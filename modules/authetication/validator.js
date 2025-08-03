@@ -33,10 +33,7 @@ module.exports = {
     ],
 
     validatorSignIn: [
-        body("email")
-            .trim()
-            .isEmail()
-            .withMessage("Invalid email format."),
+        body("email").trim().isEmail().withMessage("Invalid email format."),
 
         body("password")
             .trim()
@@ -59,10 +56,7 @@ module.exports = {
     ],
 
     validatorOTP: [
-        body("email")
-            .trim()
-            .isEmail()
-            .withMessage("Invalid email format."),
+        body("email").trim().isEmail().withMessage("Invalid email format."),
 
         body("pin")
             .trim()
@@ -83,4 +77,40 @@ module.exports = {
             next();
         },
     ],
+
+    validateForgerPasswordEmail: [
+        body("email").trim().isEmail().withMessage("Invalid email format."),
+        (req, res, next) => {
+            const error = validationResult(req);
+
+            if (!error.isEmpty())
+                return res.status(400).send({
+                    code: 400,
+                    message: error.array()[0].msg,
+                });
+
+            next();
+        },
+    ],
+
+    validateResetPassword: [
+        body("newPassword")
+            .trim()
+            .isLength({
+                min: 8,
+            })
+            .withMessage("New password is required."),
+
+        (req, res, next) => {
+            const error = validationResult(req);
+
+            if (!error.isEmpty())
+                return res.status(400).send({
+                    code: 400,
+                    message: error.array()[0].msg,
+                });
+
+            next();
+        },
+    ]
 };
