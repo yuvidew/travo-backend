@@ -1,5 +1,9 @@
-const { getDB } = require("../../db/connectDB");
-const { sendVerificationCode } = require("../../verification/SendVerificationCode")
+const {
+    getDB
+} = require("../../db/connectDB");
+const {
+    sendVerificationCode
+} = require("../../verification/SendVerificationCode")
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -8,7 +12,11 @@ const jwt = require("jsonwebtoken");
 
 
 const signup = async (req, res) => {
-    const { name, email, password } = req.body;
+    const {
+        name,
+        email,
+        password
+    } = req.body;
 
     try {
         const db = getDB();
@@ -39,7 +47,7 @@ const signup = async (req, res) => {
 
 
     } catch (error) {
-        console.log("Sign up Error: " ,error);
+        console.log("Sign up Error: ", error);
         return res.status(400).json({
             code: 400,
             message: "Something went wrong. Please check the password and email!",
@@ -50,7 +58,10 @@ const signup = async (req, res) => {
 
 
 const signin = async (req, res) => {
-    const { email, password } = req.body;
+    const {
+        email,
+        password
+    } = req.body;
 
     try {
         const db = getDB();
@@ -66,6 +77,13 @@ const signin = async (req, res) => {
         }
 
         const user = users[0];
+
+        if (!user.password && user.google_id) {
+            return res.status(400).json({
+                success: false,
+                message: "This account is registered with Google. Please login using Google."
+            });
+        }
 
         const match = await bcrypt.compare(password, user.password);
 
@@ -77,10 +95,12 @@ const signin = async (req, res) => {
         };
 
         const code = await sendVerificationCode(email);
-        console.log("Generated OTP:", code); 
 
         if (!code) {
-            return res.status(500).json({ success: false, message: "Failed to generate OTP" });
+            return res.status(500).json({
+                success: false,
+                message: "Failed to generate OTP"
+            });
         }
         const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
@@ -91,12 +111,12 @@ const signin = async (req, res) => {
 
 
         return res.status(200).json({
-            success : true,
-            message : "OTP sent to your email. Please verify to complete login."
+            success: true,
+            message: "OTP sent to your email. Please verify to complete login."
         })
 
     } catch (error) {
-        console.log("Sign in Error: " ,error);
+        console.log("Sign in Error: ", error);
         return res.status(400).json({
             code: 400,
             message: "Something went wrong. Please check the password and email!",
@@ -106,7 +126,10 @@ const signin = async (req, res) => {
 }
 
 const otpCheck = async (req, res) => {
-    const { email, pin } = req.body;
+    const {
+        email,
+        pin
+    } = req.body;
 
     try {
         const db = getDB();
@@ -123,7 +146,7 @@ const otpCheck = async (req, res) => {
 
         const user = users[0];
 
-        console.log("the user data " , user);
+        console.log("the user data ", user);
 
         if (!user.otp_code || !user.otp_expiry) {
             return res.status(400).json({
@@ -155,12 +178,11 @@ const otpCheck = async (req, res) => {
 
         await db.query("UPDATE admins SET otp_code = NULL, otp_expiry = NULL WHERE email = ?", [email]);
 
-        const token = jwt.sign(
-            {
-                id : user.id,
-                email : user.email,
-                name : user.username
-            },
+        const token = jwt.sign({
+            id: user.id,
+            email: user.email,
+            name: user.username
+        },
             process.env.JWT_SECRET
         )
 
@@ -169,10 +191,10 @@ const otpCheck = async (req, res) => {
             success: true,
             message: "OTP verified successfully!",
             token,
-            user : {
-                id : user.id,
-                email : user.email,
-                name : user.username
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.username
             }
         });
 
@@ -189,8 +211,10 @@ const otpCheck = async (req, res) => {
 
 // start to forget password
 
-const verifyEmail = async (req , res) => {
-    const {email} = req.body;
+const verifyEmail = async (req, res) => {
+    const {
+        email
+    } = req.body;
 
     try {
         const db = getDB();
@@ -208,7 +232,10 @@ const verifyEmail = async (req , res) => {
         const code = await sendVerificationCode(email);
 
         if (!code) {
-            return res.status(500).json({ success: false, message: "Failed to generate OTP" });
+            return res.status(500).json({
+                success: false,
+                message: "Failed to generate OTP"
+            });
         }
         const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
@@ -218,11 +245,11 @@ const verifyEmail = async (req , res) => {
         );
 
         return res.status(200).json({
-            success : true,
-            message : "OTP sent to your email. Please verify to complete login."
+            success: true,
+            message: "OTP sent to your email. Please verify to complete login."
         })
     } catch (error) {
-        console.log("Verify email Error: " ,error);
+        console.log("Verify email Error: ", error);
         return res.status(400).json({
             code: 400,
             message: "Something went wrong. Please check the password and email!",
@@ -231,8 +258,11 @@ const verifyEmail = async (req , res) => {
     }
 }
 
-const verifyPinCode = async (req , res) => {
-    const { email, pin } = req.body;
+const verifyPinCode = async (req, res) => {
+    const {
+        email,
+        pin
+    } = req.body;
 
     try {
         const db = getDB();
@@ -278,9 +308,9 @@ const verifyPinCode = async (req , res) => {
         }
 
         return res.status(200).json({
-            code : 200,
-            success : true,
-            message : "OTP verified successfully"
+            code: 200,
+            success: true,
+            message: "OTP verified successfully"
         })
     } catch (error) {
         console.error("from forget password verify pin code ", error);
@@ -292,8 +322,11 @@ const verifyPinCode = async (req , res) => {
     }
 }
 
-const resetPassword = async (req , res) => {
-    const { email, newPassword } = req.body;
+const resetPassword = async (req, res) => {
+    const {
+        email,
+        newPassword
+    } = req.body;
 
     try {
         const db = getDB();
@@ -338,11 +371,71 @@ const resetPassword = async (req , res) => {
     }
 }
 
+const googleAuth = async (req, res) => {
+    const {
+        id,
+        email,
+        name,
+        picture
+    } = req.body;
+
+    if (!email) {
+        return res.status(400).json({
+            error: "Email is required"
+        })
+    }
+
+    try {
+        const [rows] = await db.query("SELECT * FROM admins WHERE email = ? ", [email]);
+
+        let isNewUser = false;
+
+        if (rows.length === 0) {
+            isNewUser = true;
+
+            await db.query("INSERT INTO admins (google_id , name , email , picture) VALUES (?, ?, ?, ?)", [id, name, email, picture]);
+
+        }
+
+        const code = await sendVerificationCode(email);
+
+        if (!code) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to generate OTP"
+            });
+        }
+        const expiry = new Date(Date.now() + 5 * 60 * 1000);
+
+        await db.query(
+            "UPDATE admins SET otp_code = ?, otp_expiry = ? WHERE email = ?",
+            [code, expiry, email]
+        );
+
+
+        return res.status(200).json({
+            success: true,
+            message: isNewUser ?
+                "Account created. OTP sent to your email for verification." :
+                "OTP sent to your email. Please verify to complete login."
+        });
+
+    } catch (error) {
+        console.error("Google login registration error:", error);
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: "Internal server error. Please try again.",
+        });
+    }
+}
+
 module.exports = {
     signin,
     signup,
     otpCheck,
     verifyEmail,
     verifyPinCode,
-    resetPassword
+    resetPassword,
+    googleAuth
 }
