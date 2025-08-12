@@ -28,6 +28,8 @@ const createTrip = async (req, res) => {
         userId,
     } = req.body;
 
+    console.log("Creating trip with data:", req.body);
+
     try {
         const db = getDB();
 

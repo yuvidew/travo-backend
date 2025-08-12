@@ -23,8 +23,8 @@ router.post("/auth/google-login" , validateGoogleAuth , googleAuth)
 
 
 // start to trips
-router.post("/trips/create", validatorCreateTrip, authenticate, createTrip);
-router.get("/trips", validatorGetTrips, authenticate, getTrips);
+router.post("/trip/create-trip", validatorCreateTrip, authenticate, createTrip);
+router.get("/trip/get-trips", validatorGetTrips, authenticate, getTrips);
 // end to trips
 
 module.exports = router
