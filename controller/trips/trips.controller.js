@@ -32,7 +32,7 @@ const createTrip = async (req, res) => {
         const db = getDB();
 
         const [rows] = await db.query(
-            "INSERT INTO trips (country, group_type, travel_style, interest, budget_estimate, images, result, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO trips (country, group_type, travel_style, interest, budget_estimate, images, result, userId , is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 country,
                 group_type,
@@ -42,6 +42,7 @@ const createTrip = async (req, res) => {
                 images,
                 result,
                 userId,
+                1
             ]
         );
 
@@ -72,20 +73,20 @@ const createTrip = async (req, res) => {
 /**
  * Retrieves all trips for a specific user.
  *
- * @param {import("express").Request} req - Express request object containing userId in the body.
- * @param {string|number} req.body.userId - ID of the user whose trips are to be fetched.
+ * @param {import("express").Request} req - Express request object containing userId in the params.
+ * @param {string|number} req.params.userId - ID of the user whose trips are to be fetched.
  * @param {import("express").Response} res - Express response object.
  * @returns {Promise<void>} Sends JSON response with the trips or an error message.
  */
 
 const getTrips = async (req , res) => {
-    const {userId} = req.body;
+    const {userId} = req.params;
     try {
         const db = getDB();
 
         if (!userId) {
-            return res.status(400).json({
-                code: 400,
+            return res.status(409).json({
+                code: 409,
                 success: false,
                 message: "User ID is required",
             });
@@ -118,7 +119,49 @@ const getTrips = async (req , res) => {
     }
 }
 
+const getTripByID = async (req, res) => {
+    const { tripId } = req.params;
+
+    try {
+        const db = getDB();
+
+        if (!tripId) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: "Trip ID is required",
+            });
+        }
+
+        const [rows] = await db.query(
+            "SELECT * FROM trips WHERE id = ?",
+            [tripId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: "Trip not found",
+            });
+        }
+
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            trip: rows[0],
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: 500,
+            message: "Something went wrong while fetching the trip.",
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     createTrip,
     getTrips,
+    getTripByID
 };
