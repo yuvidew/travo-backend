@@ -32,7 +32,9 @@ const createTrip = async (req, res) => {
         const db = getDB();
 
         const [rows] = await db.query(
-            "INSERT INTO trips (country, group_type, travel_style, interest, budget_estimate, images, result, userId , is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            `INSERT INTO trips 
+            (country, group_type, travel_style, interest, budget_estimate, images, result, user_id, is_published) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 country,
                 group_type,
@@ -42,9 +44,10 @@ const createTrip = async (req, res) => {
                 images,
                 result,
                 userId,
-                1
+                1 // is_published default true
             ]
         );
+
 
         if (rows.affectedRows === 0) {
             return res.status(400).json({
@@ -62,6 +65,7 @@ const createTrip = async (req, res) => {
             trip : rows
         });
     } catch (error) { 
+        console.log("Error to create trip:" ,error);
         return res.status(500).json({
             code: 500,
             message: "Something went wrong while creating the trip.",
