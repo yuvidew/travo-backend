@@ -32,7 +32,9 @@ const createTrip = async (req, res) => {
         const db = getDB();
 
         const [rows] = await db.query(
-            "INSERT INTO trips (country, group_type, travel_style, interest, budget_estimate, images, result, userId , is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            `INSERT INTO trips 
+            (country, group_type, travel_style, interest, budget_estimate, images, result, user_id, is_published) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 country,
                 group_type,
@@ -42,7 +44,7 @@ const createTrip = async (req, res) => {
                 images,
                 result,
                 userId,
-                1
+                1 // is_published default true
             ]
         );
 
