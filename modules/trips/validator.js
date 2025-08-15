@@ -27,7 +27,7 @@ module.exports = {
         },
     ],
     validatorGetTrips: [
-        body("userId").notEmpty().withMessage("User ID is required"),
+        param("userId").notEmpty().withMessage("User ID is required"),
         (req, res, next) => {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -39,4 +39,17 @@ module.exports = {
             next();
         },
     ],
+    validatorGetTripById : [
+        param("tripId").notEmpty().withMessage("Trip is is required"),
+        (req, res, next) => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: errors.array()[0].msg,
+                });
+            }
+            next();
+        },
+    ]
 };
