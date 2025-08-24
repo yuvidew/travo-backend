@@ -27,7 +27,7 @@ module.exports = {
         },
     ],
     validatorGetTrips: [
-        param("userId").notEmpty().withMessage("User ID is required"),
+        param("user_id").notEmpty().withMessage("User ID is required"),
         (req, res, next) => {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -41,6 +41,19 @@ module.exports = {
     ],
     validatorGetTripById : [
         param("tripId").notEmpty().withMessage("Trip is is required"),
+        (req, res, next) => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: errors.array()[0].msg,
+                });
+            }
+            next();
+        },
+    ],
+    validatorGetChartBoatData : [
+        body("message").notEmpty().withMessage("Message is required"),
         (req, res, next) => {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {

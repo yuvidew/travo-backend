@@ -2,8 +2,8 @@ const express = require("express");
 
 const {signin , signup , otpCheck, verifyEmail, verifyPinCode, resetPassword, googleAuth} = require("../controller/admin/auth.controller");
 const { validatorSignUp, validatorSignIn, validatorOTP, validateForgerPasswordEmail, validateResetPassword, validateGoogleAuth } = require("../modules/authetication/validator");
-const { validatorCreateTrip, validatorGetTrips, validatorGetTripById } = require("../modules/trips/validator");
-const { createTrip, getTrips, getTripByID } = require("../controller/trips/trips.controller");
+const { validatorCreateTrip, validatorGetTrips, validatorGetTripById, validatorGetChartBoatData } = require("../modules/trips/validator");
+const { createTrip, getTrips, getTripByID, getChartBoatData } = require("../controller/trips/trips.controller");
 const { authenticate } = require("../modules/authetication/authentication");
 
 
@@ -24,8 +24,9 @@ router.post("/auth/google-login" , validateGoogleAuth , googleAuth)
 
 // start to trips
 router.post("/trip/create-trip", validatorCreateTrip, authenticate, createTrip);
-router.get("/trip/:userId", validatorGetTrips, authenticate, getTrips);
+router.get("/trip/get-trips/:user_id", validatorGetTrips, authenticate, getTrips);
 router.get("/trip/get-trip-by-id/:tripId" , validatorGetTripById , authenticate , getTripByID)
+router.get("/trip/get-trips-search" , validatorGetChartBoatData , authenticate , getChartBoatData)
 // end to trips
 
 module.exports = router

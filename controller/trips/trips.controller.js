@@ -1,4 +1,6 @@
 const { getDB } = require("../../db/connectDB");
+const { sanitizeAndFixSql, shortMessage } = require("../../utils");
+const { getGeminiResult } = require("../../utils/gemini-ai");
 
 /**
  * Creates a new trip for the specified user.
@@ -60,10 +62,10 @@ const createTrip = async (req, res) => {
             code: 201,
             success: true,
             message: "Trip created successfully",
-            data : { id: rows.insertId }, // Return the ID of the newly created trip,
-            trip : rows
+            data: { id: rows.insertId }, // Return the ID of the newly created trip,
+            trip: rows
         });
-    } catch (error) { 
+    } catch (error) {
         return res.status(500).json({
             code: 500,
             message: "Something went wrong while creating the trip.",
@@ -81,12 +83,13 @@ const createTrip = async (req, res) => {
  * @returns {Promise<void>} Sends JSON response with the trips or an error message.
  */
 
-const getTrips = async (req , res) => {
-    const {userId} = req.params;
+const getTrips = async (req, res) => {
+    const { user_id } = req.params;
+    // console.log("🔍 Fetching trips for userId:", user_id);
     try {
         const db = getDB();
 
-        if (!userId) {
+        if (!user_id) {
             return res.status(409).json({
                 code: 409,
                 success: false,
@@ -95,8 +98,8 @@ const getTrips = async (req , res) => {
         }
 
         const [rows] = await db.query(
-            "SELECT * FROM trips WHERE userId = ?",
-            [userId]
+            "SELECT * FROM trips WHERE user_id = ?",
+            [user_id]
         );
 
         if (rows.length === 0) {
@@ -107,12 +110,15 @@ const getTrips = async (req , res) => {
             });
         }
 
+        // console.log("the row " , rows);
+
         return res.status(200).json({
             code: 200,
             success: true,
-            data: rows,
+            trips: rows,
         });
     } catch (error) {
+        console.log("Error to get the data by use user is ", error);
         return res.status(500).json({
             code: 500,
             message: "Something went wrong while fetching trips.",
@@ -162,8 +168,110 @@ const getTripByID = async (req, res) => {
     }
 };
 
+// const getChartBoatData = async(req , res) => {
+//     const {message} = req.body;
+//     console.log("the message" , message);
+
+//     try {
+//         const db = getDB();
+//         if (!message) {
+//             return res.status(400).json({
+//                 code: 400,
+//                 success: false,
+//                 message: "Message is required is required",
+//             });
+//         }
+
+//         const [rows] = await db.query("SELECT * FROM trips");
+
+//         if (rows.length === 0) { 
+//             return res.status(404).json({
+//                 code: 404,
+//                 success: false,
+//                 message: "Trip not found",
+//             });
+//         }
+
+//         const result = await getGeminiResult(message , rows);
+
+//         return res.status(200).json({
+//             code: 200,
+//             success: true,
+//             result,
+//         });
+//     } catch (error) {
+//         return res.status(500).json({
+//             code: 500,
+//             message: "Something went wrong while fetching the trip.",
+//             error: error.message,
+//         });
+//     }
+// }
+
+const getChartBoatData = async (req, res) => {
+    const { message } = req.body;
+    try {
+        const db = getDB();
+
+        if (!message) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: "Message is required.",
+            });
+        }
+
+        const [allRows] = await db.query("SELECT * FROM trips LIMIT 200");
+
+        if (allRows.length === 0) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: "Trip not found",
+            });
+        }
+
+        const generated = await getGeminiResult(message, allRows); 
+
+        const { sql, warnings } = sanitizeAndFixSql(generated);
+
+        const [filtered] = await db.query(sql);
+
+        const data = filtered.map(r => {
+            if (r?.result && typeof r.result === "string") {
+                try {
+                    return { ...r, result: JSON.parse(r.result) };
+                } catch {
+                    return r;
+                }
+            }
+            return r;
+        });
+
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: `Here are the results for your request: "${shortMessage(message)}". We searched trips that match your filters.`,
+            sql,                            
+            warnings,                       
+            count: data.length,
+            data
+        });
+    } catch (error) {
+        console.error("getChartBoatData error:", error);
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: "Something went wrong while fetching trips.",
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     createTrip,
     getTrips,
-    getTripByID
+    getTripByID,
+    getChartBoatData
 };
+
