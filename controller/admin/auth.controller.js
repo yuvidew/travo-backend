@@ -8,7 +8,6 @@ const {
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// TODO: implement forget password api 
 
 
 const signup = async (req, res) => {
