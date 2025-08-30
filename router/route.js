@@ -22,6 +22,7 @@ const {
     validatorGetTrips,
     validatorGetTripById,
     validatorGetChartBoatData,
+    validatorInterest,
 } = require("../modules/trips/validator");
 const {
     createTrip,
@@ -40,6 +41,7 @@ const {
     resetPassword : user_reset_password,
     googleAuth : user_google_auth,
 } = require("../controller/user/auth.controller");
+const { getTripsBySelectedInterest } = require("../controller/trips/user_trips.controller");
 
 const router = express.Router();
 
@@ -50,7 +52,7 @@ router.post("/auth/verify-otp", validatorOTP, otpCheck);
 
 router.post("/auth/verify-email", validateForgerPasswordEmail, verifyEmail);
 router.post("/auth/verify-forget-password-opt", validatorOTP, verifyPinCode);
-router.put("/auth/reset-new-password", validateResetPassword, resetPassword);
+router.put("/auth/reset-new-password", validateResetPassword,authenticate, resetPassword);
 
 router.post("/auth/google-login", validateGoogleAuth, googleAuth);
 // end to admin authentication
@@ -61,7 +63,7 @@ router.post("/auth/user/sign-in", validatorSignIn, user_sign_in);
 router.post("/auth/user/verify-otp", validatorOTP, user_otp_check);
 router.post("/auth/user/verify-email", validateForgerPasswordEmail, user_verify_email);
 router.post("/auth/user/verify-forget-password-opt", validatorOTP, user_verify_pin_code);
-router.put("/auth/user/reset-new-password", validateResetPassword, user_reset_password);
+router.put("/auth/user/reset-new-password", validateResetPassword, authenticate, user_reset_password);
 router.post("/auth/user/google-login", validateGoogleAuth, user_google_auth);
 
 // end to users authentication
@@ -87,5 +89,15 @@ router.get(
     getChartBoatData
 );
 // end to trips
+
+
+// start to user trips api
+router.get(
+    "/trip/get-trips-by-interest",
+    validatorInterest,
+    authenticate,
+    getTripsBySelectedInterest
+)
+// end to user trips api
 
 module.exports = router;

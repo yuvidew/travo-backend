@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const signup = async (req, res) => {
+    console.log("sign up api call");
     const {
         name,
         email,
@@ -54,6 +55,8 @@ const signup = async (req, res) => {
 };
 
 const signin = async (req, res) => {
+    console.log("sign in api call");
+
     const {
         email,
         password
@@ -77,7 +80,7 @@ const signin = async (req, res) => {
 
         if (!user.password && user.google_id) {
             return res.status(400).json({
-                code:400,
+                code: 400,
                 success: false,
                 message: "This account is registered with Google. Please login using Google."
             });
@@ -243,7 +246,7 @@ const verifyEmail = async (req, res) => {
         })
     } catch (error) {
         console.log("Verify email Error: ", error);
-        return res.status(400).json({
+        return res.status(500).json({
             code: 400,
             message: "Something went wrong. Please check the password and email!",
             error: error.message,
@@ -300,10 +303,19 @@ const verifyPinCode = async (req, res) => {
             });
         }
 
+        const token = jwt.sign({
+            id: user.id,
+            email: user.email,
+            name: user.username
+        },
+            process.env.JWT_SECRET
+        )
+
         return res.status(200).json({
             code: 200,
             success: true,
-            message: "OTP verified successfully"
+            message: "OTP verified successfully",
+            token
         })
     } catch (error) {
         console.error("from forget password verify pin code ", error);
@@ -372,7 +384,7 @@ const googleAuth = async (req, res) => {
         picture
     } = req.body;
 
-    console.log("the google auth api is calling " , req.body);
+    console.log("the google auth api is calling ", req.body);
 
     if (!email) {
         return res.status(400).json({
@@ -383,7 +395,7 @@ const googleAuth = async (req, res) => {
     try {
         const db = getDB();
 
-        const [rows] = await db.query("SELECT * FROM users WHERE email = ?AND google_id = ? ", [email , id]);
+        const [rows] = await db.query("SELECT * FROM users WHERE email = ?AND google_id = ? ", [email, id]);
 
         let isNewUser = false;
 
@@ -399,7 +411,7 @@ const googleAuth = async (req, res) => {
 
         if (!code) {
             return res.status(500).json({
-                code : 500,
+                code: 500,
                 success: false,
                 message: "Failed to generate OTP"
             });
@@ -413,7 +425,7 @@ const googleAuth = async (req, res) => {
 
 
         return res.status(200).json({
-            code : 200,
+            code: 200,
             success: true,
             message: isNewUser ?
                 "Account created. OTP sent to your email for verification." :
