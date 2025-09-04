@@ -39,7 +39,7 @@ module.exports = {
             next();
         },
     ],
-    validatorGetTripById : [
+    validatorGetTripById: [
         param("tripId").notEmpty().withMessage("Trip is is required"),
         (req, res, next) => {
             const errors = validationResult(req);
@@ -52,7 +52,7 @@ module.exports = {
             next();
         },
     ],
-    validatorGetChartBoatData : [
+    validatorGetChartBoatData: [
         body("message").notEmpty().withMessage("Message is required"),
         (req, res, next) => {
             const errors = validationResult(req);
@@ -65,10 +65,16 @@ module.exports = {
             next();
         },
     ],
-    validatorInterest : [
-        body("travel_styles")
-        .isArray({ min: 1 })
-        .withMessage("travel styles must be a non-empty array"),
+    validatorTravelStyle: [
+        query("travel_styles")
+            .notEmpty()
+            .withMessage("travel styles query is required")
+            .customSanitizer((value) => {
+                // convert "adventure,relaxation" → ["adventure","relaxation"]
+                return value.split(",").map((s) => s.trim());
+            })
+            .isArray({ min: 1 })
+            .withMessage("travel styles must be a non-empty array"),
         (req, res, next) => {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {

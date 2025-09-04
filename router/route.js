@@ -22,7 +22,7 @@ const {
     validatorGetTrips,
     validatorGetTripById,
     validatorGetChartBoatData,
-    validatorInterest,
+    validatorTravelStyle,
 } = require("../modules/trips/validator");
 const {
     createTrip,
@@ -41,7 +41,7 @@ const {
     resetPassword : user_reset_password,
     googleAuth : user_google_auth,
 } = require("../controller/user/auth.controller");
-const { getTripsBySelectedInterest } = require("../controller/trips/user_trips.controller");
+const { getTripsBySelectedTravelStyle } = require("../controller/trips/user_trips.controller");
 
 const router = express.Router();
 
@@ -93,10 +93,10 @@ router.get(
 
 // start to user trips api
 router.get(
-    "/trip/get-trips-by-interest",
-    validatorInterest,
+    "/trip/get-trips-by-travel-style",
+    validatorTravelStyle,
     authenticate,
-    getTripsBySelectedInterest
+    getTripsBySelectedTravelStyle
 )
 // end to user trips api
 

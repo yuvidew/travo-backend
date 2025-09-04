@@ -1,7 +1,8 @@
 const { getDB } = require("../../db/connectDB");
 
-const getTripsBySelectedInterest = async (req, res) => {
-    const { travel_styles } = req.body;
+const getTripsBySelectedTravelStyle = async (req, res) => {
+    const { travel_styles } = req.query;
+
 
     try {
         const db = getDB();
@@ -21,7 +22,7 @@ const getTripsBySelectedInterest = async (req, res) => {
         }
 
         const user_travel_styles_trips = rows.filter((item) => 
-            travel_styles.some(
+            travel_styles.split(",").some(
                 (travel_style) => travel_style.toLowerCase() === item.travel_style.toLowerCase()
             )
         );
@@ -41,6 +42,7 @@ const getTripsBySelectedInterest = async (req, res) => {
         })
 
     } catch (error) {
+        console.log("e");
         return res.status(500).json({
             code: 500,
             message: "Something went wrong while fetching the trip.",
@@ -50,5 +52,5 @@ const getTripsBySelectedInterest = async (req, res) => {
 };
 
 module.exports = {
-    getTripsBySelectedInterest,
+    getTripsBySelectedTravelStyle,
 }
