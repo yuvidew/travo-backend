@@ -40,7 +40,7 @@ module.exports = {
         },
     ],
     validatorGetTripById: [
-        param("tripId").notEmpty().withMessage("Trip is is required"),
+        param("tripId").notEmpty().withMessage("Trip Id is required"),
         (req, res, next) => {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {

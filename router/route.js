@@ -29,6 +29,7 @@ const {
     getTrips,
     getTripByID,
     getChartBoatData,
+    onTogglePublishTrip,
 } = require("../controller/trips/trips.controller");
 const { authenticate } = require("../modules/authetication/authentication");
 
@@ -41,7 +42,7 @@ const {
     resetPassword : user_reset_password,
     googleAuth : user_google_auth,
 } = require("../controller/user/auth.controller");
-const { getTripsBySelectedTravelStyle } = require("../controller/trips/user_trips.controller");
+const { getTripsBySelectedTravelStyle, getTripsByIdForUser } = require("../controller/trips/user_trips.controller");
 
 const router = express.Router();
 
@@ -68,7 +69,7 @@ router.post("/auth/user/google-login", validateGoogleAuth, user_google_auth);
 
 // end to users authentication
 
-// start to trips
+// start to admin trips
 router.post("/trip/create-trip", validatorCreateTrip, authenticate, createTrip);
 router.get(
     "/trip/get-trips/:user_id",
@@ -88,15 +89,29 @@ router.get(
     authenticate,
     getChartBoatData
 );
-// end to trips
+
+router.put(
+    "/trip/update-trip-publish/:tripId",
+    validatorGetTripById,
+    authenticate,
+    onTogglePublishTrip
+)
+// end to admin trips
 
 
 // start to user trips api
 router.get(
-    "/trip/get-trips-by-travel-style",
+    "/trip/user/get-trips-by-travel-style",
     validatorTravelStyle,
     authenticate,
     getTripsBySelectedTravelStyle
+)
+
+router.get(
+    "/trip/user/get-trip-by-id/:tripId",
+    validatorGetTripById,
+    authenticate,
+    getTripsByIdForUser
 )
 // end to user trips api
 
