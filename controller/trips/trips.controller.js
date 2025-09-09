@@ -46,7 +46,7 @@ const createTrip = async (req, res) => {
                 images,
                 result,
                 userId,
-                1 // is_published default true
+                0 // is_published default true
             ]
         );
 
@@ -74,6 +74,64 @@ const createTrip = async (req, res) => {
     }
 };
 
+const onTogglePublishTrip = async (req , res) => {
+    const { tripId } = req.params
+
+    try {
+        const db = getDB();
+
+        if (!tripId) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: "Trip ID is required",
+            });
+        }
+
+        const [findTrip] = await db.query(
+            "SELECT * FROM trips WHERE id = ?",
+            [tripId]
+        );
+
+        if (findTrip.length === 0) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: "No trips found for this trip id",
+            });
+        }
+
+        const isToggle = findTrip[0].is_published === 1 ? 0 : 1
+
+        const [updateResult] = await db.query(
+            "UPDATE trips SET is_published = ? WHERE id = ?",
+            [isToggle, tripId]
+        );
+
+        if (!updateResult || updateResult.affectedRows === 0) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: "No trips found for this trip id",
+            });
+        }
+
+        return res.status(200).json({
+            code: 200,
+            message: "Trip publish status updated",
+            success: true,
+            trip: { id: tripId, is_published: isToggle }
+        })
+    } catch (error) {
+        console.log("Error to update trips publish ", error);
+        return res.status(500).json({
+            code: 500,
+            message: "Something went wrong while fetching trips.",
+            error: error.message,
+        });
+    }
+}
+
 /**
  * Retrieves all trips for a specific user.
  *
@@ -96,6 +154,8 @@ const getTrips = async (req, res) => {
                 message: "User ID is required",
             });
         }
+
+
 
         const [rows] = await db.query(
             "SELECT * FROM trips WHERE user_id = ?",
@@ -231,7 +291,7 @@ const getChartBoatData = async (req, res) => {
             });
         }
 
-        const generated = await getGeminiResult(message, allRows); 
+        const generated = await getGeminiResult(message, allRows);
 
         const { sql, warnings } = sanitizeAndFixSql(generated);
 
@@ -252,8 +312,8 @@ const getChartBoatData = async (req, res) => {
             code: 200,
             success: true,
             message: `Here are the results for your request: "${shortMessage(message)}". We searched trips that match your filters.`,
-            sql,                            
-            warnings,                       
+            sql,
+            warnings,
             count: data.length,
             data
         });
@@ -272,6 +332,7 @@ module.exports = {
     createTrip,
     getTrips,
     getTripByID,
-    getChartBoatData
+    getChartBoatData,
+    onTogglePublishTrip
 };
 

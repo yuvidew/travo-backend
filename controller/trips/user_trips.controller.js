@@ -51,6 +51,49 @@ const getTripsBySelectedTravelStyle = async (req, res) => {
     }
 };
 
+const getTripsByIdForUser = async (req, res) => {
+    const { tripId } = req.params;
+
+    try {
+        const db = getDB();
+
+        if (!tripId) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: "Trip id is required" 
+            })
+        }
+
+        const [rows] = await db.query(
+            "SELECT * FROM trips WHERE id = ? AND is_published = 1",
+            [tripId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: "Trip not found",
+            });
+        }
+
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            trip: rows[0],
+            result : JSON.parse(rows[0].result)
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: 500,
+            message: "Something went wrong while fetching the trip.",
+            error: error.message,
+        });
+    }
+}
+
 module.exports = {
     getTripsBySelectedTravelStyle,
+    getTripsByIdForUser
 }
