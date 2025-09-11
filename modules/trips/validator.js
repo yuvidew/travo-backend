@@ -85,5 +85,43 @@ module.exports = {
             }
             next();
         },
+    ],
+    validatorToBookTrip: [
+        body("trip_id")
+            .notEmpty().withMessage("Trip ID is required")
+            .bail()
+            .isInt().withMessage("Trip ID must be an integer"),
+        body("user_id")
+            .notEmpty().withMessage("User ID is required")
+            .bail()
+            .isInt().withMessage("User ID must be an integer"),
+        body("price")
+            .notEmpty().withMessage("Price is required")
+            .bail()
+            .isFloat({ gt: 0 }).withMessage("Price must be a positive number"),
+        body("start_date")
+            .notEmpty().withMessage("Start date is required")
+            .bail()
+            .isISO8601().withMessage("Start date must be a valid date (YYYY-MM-DD)"),
+        body("end_date")
+            .notEmpty().withMessage("End date is required")
+            .bail()
+            .isISO8601().withMessage("End date must be a valid date (YYYY-MM-DD)"),
+        body("booking_date")
+            .notEmpty().withMessage("booking_date is required")
+            .bail()
+            .isISO8601().withMessage("booking_date must be a valid date (YYYY-MM-DD)"),
+        body("destination").notEmpty().withMessage("Destination is required"),
+
+        (req, res, next) => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: errors.array()[0].msg,
+                });
+            }
+            next();
+        },
     ]
 };

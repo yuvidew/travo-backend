@@ -74,7 +74,7 @@ const createTrip = async (req, res) => {
     }
 };
 
-const onTogglePublishTrip = async (req , res) => {
+const onTogglePublishTrip = async (req, res) => {
     const { tripId } = req.params
 
     try {
@@ -228,6 +228,150 @@ const getTripByID = async (req, res) => {
     }
 };
 
+const onBookingTrip = async (req, res) => {
+    const { trip_id, user_id, start_date, end_date, price, booking_date, destination } = req.body;
+
+    try {
+        const db = getDB();
+
+        if (!user_id || !trip_id || !price || !start_date || !end_date) {
+            return res.status(400).json({
+                code: 400,
+                message: "All fields are required",
+                success: false
+            });
+        }
+
+        const [findTrip] = await db.query(
+            "SELECT * FROM bookings WHERE trip_id = ?",
+            [trip_id]
+        );
+
+        if (findTrip.length > 0) {
+            return res.status(404).json({
+                code: 404,  
+                success: false,
+                message: "Trip already booked with this trip id",
+            });
+        }
+
+        const sql = `
+            INSERT INTO bookings (user_id, trip_id, price, start_date, end_date, booking_date , destination)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const [rows] = await db.query(sql, [user_id, trip_id, price, start_date, end_date, booking_date, destination]);
+
+        if (rows.affectedRows === 0) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: "Failed to book the trip",
+            });
+        }
+
+        return res.status(201).json({
+            code: 201,
+            success: true,
+            message: "Booking created successfully",
+            bookingId: rows.insertId
+        })
+
+    } catch (error) {
+        console.log("Error to book the trip", error);
+        return res.status(500).json({
+            code: 500,
+            message: "Something went wrong while fetching the trip.",
+            error: error.message,
+        });
+    }
+}
+
+const getAllBooking = async (req, res) => {
+    try {
+        const db = getDB();
+
+        const [bookings] = await db.query(`
+            SELECT b.id AS booking_id, b.user_id, b.trip_id, b.price, b.start_date, b.end_date, 
+                b.status, b.booking_date, b.destination,
+                u.name AS user_name, u.email AS user_email
+            FROM bookings b
+            JOIN users u ON b.user_id = u.id
+        `);
+        if (bookings.length === 0) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: "No bookings found",
+            });
+        }
+
+        const [trips] = await db.query(`
+        SELECT * FROM trips
+        `);
+
+        if (trips.length === 0) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: "No trips found",
+            });
+        }
+
+        const userBookingsMap = {};
+
+        bookings.forEach(booking => {
+            const trip = trips.find(t => t.id === booking.trip_id);
+
+            const tripData = trip ? {
+                ...trip,
+                images: trip.images ? trip.images.split(",") : [],
+                result: trip.result ? JSON.parse(trip.result) : null,
+                booking: {
+                    id: booking.id,
+                    user_name: booking.user_name,
+                    email: booking.user_email,
+                    price: booking.price,
+                    start_date: booking.start_date,
+                    end_date: booking.end_date,
+                    status: booking.status,
+                    booking_date: booking.booking_date,
+                    destination: booking.destination
+                }
+            } : null;
+
+            if (!userBookingsMap[booking.user_id]) {
+                userBookingsMap[booking.user_id] = {
+                    user_id: booking.user_id,
+                    trips: []
+                };
+            }
+
+            if (tripData) {
+                userBookingsMap[booking.user_id].trips.push(tripData);
+            }
+        })
+
+        const result = Object.values(userBookingsMap);
+
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            trips: result
+        })
+
+
+    } catch (error) {
+        console.log("Error to book the trip", error);
+        return res.status(500).json({
+            code: 500,
+            message: "Something went wrong while fetching the trip.",
+            error: error.message,
+        });
+    }
+}
+
+
 // const getChartBoatData = async(req , res) => {
 //     const {message} = req.body;
 //     console.log("the message" , message);
@@ -333,6 +477,8 @@ module.exports = {
     getTrips,
     getTripByID,
     getChartBoatData,
-    onTogglePublishTrip
+    onTogglePublishTrip,
+    onBookingTrip,
+    getAllBooking
 };
 

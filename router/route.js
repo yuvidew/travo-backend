@@ -23,6 +23,7 @@ const {
     validatorGetTripById,
     validatorGetChartBoatData,
     validatorTravelStyle,
+    validatorToBookTrip,
 } = require("../modules/trips/validator");
 const {
     createTrip,
@@ -30,6 +31,8 @@ const {
     getTripByID,
     getChartBoatData,
     onTogglePublishTrip,
+    onBookingTrip,
+    getAllBooking,
 } = require("../controller/trips/trips.controller");
 const { authenticate } = require("../modules/authetication/authentication");
 
@@ -96,6 +99,19 @@ router.put(
     authenticate,
     onTogglePublishTrip
 )
+
+router.post(
+    "/trip/user/book-trip",
+    validatorToBookTrip,
+    authenticate,
+    onBookingTrip
+)
+
+router.get(
+    "/trip/admin/booked-trips",
+    authenticate,
+    getAllBooking
+)
 // end to admin trips
 
 
@@ -113,6 +129,8 @@ router.get(
     authenticate,
     getTripsByIdForUser
 )
+
+
 // end to user trips api
 
 module.exports = router;
