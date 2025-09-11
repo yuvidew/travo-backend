@@ -35,7 +35,7 @@ const createTrip = async (req, res) => {
 
         const [rows] = await db.query(
             `INSERT INTO trips 
-            (country, group_type, travel_style, interest, budget_estimate, images, result, user_id, is_published) 
+            (country, group_type, travel_style, interest, budget_estimate, images, result, admin_id, is_published) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 country,
@@ -158,7 +158,7 @@ const getTrips = async (req, res) => {
 
 
         const [rows] = await db.query(
-            "SELECT * FROM trips WHERE user_id = ?",
+            "SELECT * FROM trips WHERE admin_id = ?",
             [user_id]
         );
 
@@ -288,6 +288,7 @@ const onBookingTrip = async (req, res) => {
 }
 
 const getAllBooking = async (req, res) => {
+    console.log("the get all booking called");
     try {
         const db = getDB();
 
