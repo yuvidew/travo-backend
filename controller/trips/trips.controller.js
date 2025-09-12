@@ -170,12 +170,14 @@ const getTrips = async (req, res) => {
             });
         }
 
-        // console.log("the row " , rows);
 
         return res.status(200).json({
             code: 200,
             success: true,
-            trips: rows,
+            trips: rows.map((trip) => ({
+                ...trip,
+                result: JSON.parse(trip.result)
+            })),
         });
     } catch (error) {
         console.log("Error to get the data by use user is ", error);
@@ -217,7 +219,7 @@ const getTripByID = async (req, res) => {
         return res.status(200).json({
             code: 200,
             success: true,
-            trip: rows[0],
+            trip: {...rows[0] , result : rows[0]?.result ? JSON.parse(rows[0].result) : null},
         });
     } catch (error) {
         return res.status(500).json({
@@ -287,8 +289,7 @@ const onBookingTrip = async (req, res) => {
     }
 }
 
-const getAllBooking = async (req, res) => {
-    console.log("the get all booking called");
+const getAllBooking = async (req, res) => { 
     try {
         const db = getDB();
 
