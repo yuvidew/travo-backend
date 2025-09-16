@@ -1,76 +1,113 @@
 [
-        {
-            "id": 1,
-            "user_id": 1,
-            "price": "500.00",
-            "start_date": "2025-09-14T18:30:00.000Z",
-            "end_date": "2025-09-19T18:30:00.000Z",
-            "status": "pending",
-            "booking_date": "2025-09-13T18:30:00.000Z",
-            "destination": "Yangon",
-            "user_name": "yuvi dew",
-            "email": "yuvi@gmail.com",
-            "country": "Myanmar",
-            "trips": [
-                {
-                    "id": 1,
-                    "country": "Myanmar",
-                    "group_type": "solo",
-                    "travel_style": "budget",
-                    "interest": "sightseeing",
-                    "budget_estimate": "500.00",
-                    "images": [],
-                    "result": "Explore the beautiful landscapes of Myanmar.",
-                    "userId": 1
-                },
-                {
-                    "id": 2,
-                    "country": "United States",
-                    "group_type": "family",
-                    "travel_style": "luxury",
-                    "interest": "adventure",
-                    "budget_estimate": "5000.00",
-                    "images": [],
-                    "result": "Experience the thrill of adventure in the USA.",
-                    "userId": 1
-                }
-            ]
-        },
-        {
-            "id": 3,
-            "user_id": 3,
-            "price": "500.00",
-            "start_date": "2025-09-14T18:30:00.000Z",
-            "end_date": "2025-09-19T18:30:00.000Z",
-            "status": "pending",
-            "booking_date": "2025-09-13T18:30:00.000Z",
-            "destination": "Portland",
-            "user_name": "yuvi dew",
-            "email": "yuvi@gmail.com",
-            "country": "United States",
-            "trips": [
-                {
-                    "id": 2,
-                    "country": "United States",
-                    "group_type": "family",
-                    "travel_style": "luxury",
-                    "interest": "adventure",
-                    "budget_estimate": "5000.00",
-                    "images": [],
-                    "result": "Experience the thrill of adventure in the USA.",
-                    "userId": 3
-                },
-                {
-                    "id": 1,
-                    "country": "Myanmar",
-                    "group_type": "solo",
-                    "travel_style": "budget",
-                    "interest": "sightseeing",
-                    "budget_estimate": "500.00",
-                    "images": [],
-                    "result": "Explore the beautiful landscapes of Myanmar.",
-                    "userId": 3
-                }
-            ]
-        }
-    ]
+    {
+        "booking_id": 1,
+        "user_id": 1,
+        "trip_id": 1,
+        "price": "500.00",
+        "start_date": "2025-09-14T18:30:00.000Z",
+        "end_date": "2025-09-19T18:30:00.000Z",
+        "status": "pending",
+        "booking_date": "2025-09-13T18:30:00.000Z",
+        "destination": "Yangon",
+        "user_name": "yuvi dew",
+        "user_email": "yuvi@gmail.com"
+    },
+    {
+        "booking_id": 2,
+        "user_id": 1,
+        "trip_id": 2,
+        "price": "500.00",
+        "start_date": "2025-09-14T18:30:00.000Z",
+        "end_date": "2025-09-19T18:30:00.000Z",
+        "status": "pending",
+        "booking_date": "2025-09-13T18:30:00.000Z",
+        "destination": "Portland",
+        "user_name": "yuvi dew",
+        "user_email": "yuvi@gmail.com"
+    },
+    {
+        "booking_id": 3,
+        "user_id": 2,
+        "trip_id": 1,
+        "price": "400.00",
+        "start_date": "2025-08-07T18:30:00.000Z",
+        "end_date": "2025-08-09T18:30:00.000Z",
+        "status": "pending",
+        "booking_date": "2025-08-04T18:30:00.000Z",
+        "destination": "Yangon",
+        "user_name": "Yuvraj",
+        "user_email": "yd00102@gmail.com"
+    },
+    {
+        "booking_id": 5,
+        "user_id": 2,
+        "trip_id": 3,
+        "price": "400.00",
+        "start_date": "2025-08-07T18:30:00.000Z",
+        "end_date": "2025-08-09T18:30:00.000Z",
+        "status": "pending",
+        "booking_date": "2025-08-04T18:30:00.000Z",
+        "destination": "Russia",
+        "user_name": "Yuvraj",
+        "user_email": "yd00102@gmail.com"
+    },
+    {
+        "booking_id": 6,
+        "user_id": 2,
+        "trip_id": 4,
+        "price": "400.00",
+        "start_date": "2025-08-07T18:30:00.000Z",
+        "end_date": "2025-08-09T18:30:00.000Z",
+        "status": "pending",
+        "booking_date": "2025-08-04T18:30:00.000Z",
+        "destination": "Nepal",
+        "user_name": "Yuvraj",
+        "user_email": "yd00102@gmail.com"
+    },
+
+
+
+    {
+        "booking_id": 1,
+        "user_id": 1,
+        "price": "500.00",
+        "start_date": "2025-09-14T18:30:00.000Z",
+        "end_date": "2025-09-19T18:30:00.000Z",
+        "status": "pending",
+        "booking_date": "2025-09-13T18:30:00.000Z",
+        "destination": "Yangon",
+        "user_name": "yuvi dew",
+        "user_email": "yuvi@gmail.com",
+        "trips" : [
+            {
+                "trip_id" : 1
+            },
+            {
+                "trip_id" : 2
+            }
+        ]
+    },
+    {
+        "booking_id": 6,
+        "user_id": 2,
+        "price": "400.00",
+        "start_date": "2025-08-07T18:30:00.000Z",
+        "end_date": "2025-08-09T18:30:00.000Z",
+        "status": "pending",
+        "booking_date": "2025-08-04T18:30:00.000Z",
+        "destination": "Nepal",
+        "user_name": "Yuvraj",
+        "user_email": "yd00102@gmail.com",
+        "trips" : [
+            {
+                "trip_id" : 1
+            },
+            {
+                "trip_id" : 3
+            },
+             {
+                "trip_id" : 4
+            }
+        ]
+    }
+]
