@@ -219,7 +219,7 @@ const getTripByID = async (req, res) => {
         return res.status(200).json({
             code: 200,
             success: true,
-            trip: {...rows[0] , result : rows[0]?.result ? JSON.parse(rows[0].result) : null},
+            trip: { ...rows[0], result: rows[0]?.result ? JSON.parse(rows[0].result) : null },
         });
     } catch (error) {
         return res.status(500).json({
@@ -251,7 +251,7 @@ const onBookingTrip = async (req, res) => {
 
         if (findTrip.length > 0) {
             return res.status(404).json({
-                code: 404,  
+                code: 404,
                 success: false,
                 message: "Trip already booked with this trip id",
             });
@@ -289,7 +289,7 @@ const onBookingTrip = async (req, res) => {
     }
 }
 
-const getAllBooking = async (req, res) => { 
+const getAllBooking = async (req, res) => {
     try {
         const db = getDB();
 
@@ -320,46 +320,56 @@ const getAllBooking = async (req, res) => {
             });
         }
 
-        const userBookingsMap = {};
 
-        bookings.forEach(booking => {
-            const trip = trips.find(t => t.id === booking.trip_id);
+        //  grouping the user by the trip_id
+        const transFormBookings = (bookings) => {
+            const grouped = new Map();
 
-            const tripData = trip ? {
-                ...trip,
-                images: trip.images ? trip.images.split(",") : [],
-                result: trip.result ? JSON.parse(trip.result) : null,
-                booking: {
-                    id: booking.id,
-                    user_name: booking.user_name,
-                    email: booking.user_email,
-                    price: booking.price,
-                    start_date: booking.start_date,
-                    end_date: booking.end_date,
-                    status: booking.status,
-                    booking_date: booking.booking_date,
-                    destination: booking.destination
+            bookings.forEach((booking) => {
+                if (!grouped.has(booking.user_id)) {
+                    const { trip_id, ...rest } = booking;
+
+                    grouped.set(booking.user_id, {
+                        ...rest,
+                        trips: [{ trip_id }],
+                    });
+                }else {
+                    grouped.get(booking.user_id).trips.push({ trip_id: booking.trip_id });
                 }
-            } : null;
+            })
 
-            if (!userBookingsMap[booking.user_id]) {
-                userBookingsMap[booking.user_id] = {
-                    user_id: booking.user_id,
-                    trips: []
-                };
-            }
+            return Array.from(grouped.values());
+        }
 
-            if (tripData) {
-                userBookingsMap[booking.user_id].trips.push(tripData);
+
+        const userMappedBookingTripId = transFormBookings(bookings);
+
+
+        // find and filter the trip_id
+        const bookingData = userMappedBookingTripId.map((booking) => {
+            const detailsTrips = booking.trips.map((t) => {
+                const trip = trips.find((trip) => trip.id === t.trip_id);
+
+                if(!trip) return null
+
+                return {
+                    ...trip,
+                    result: trip.result ? JSON.parse(trip.result) : null,
+                    images: trip.images ? trip.images.split(",") : []
+                    }
+                }
+            )
+
+            return {
+                ...booking,
+                trips : detailsTrips
             }
         })
-
-        const result = Object.values(userBookingsMap);
 
         return res.status(200).json({
             code: 200,
             success: true,
-            trips: result
+            trips: bookingData
         })
 
 
