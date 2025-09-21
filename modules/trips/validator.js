@@ -123,5 +123,25 @@ module.exports = {
             }
             next();
         },
+    ],
+    validatorToGetTripByTripsIdList: [
+        body("ids")
+            .isArray({ min: 1 })
+            .withMessage("ids must be a non-empty array"),
+
+        body("ids.*.trip_id")
+            .isInt({ gt: 0 })
+            .withMessage("trip_id must be a positive integer"),
+
+        (req, res, next) => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    success: false,
+                    message: errors.array()[0].msg,
+                });
+            }
+            next();
+        },
     ]
 };
