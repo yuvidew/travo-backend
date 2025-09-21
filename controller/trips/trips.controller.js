@@ -1,4 +1,5 @@
 const { getDB } = require("../../db/connectDB");
+const { getCurrentBookingState } = require("../../lib");
 const { sanitizeAndFixSql, shortMessage } = require("../../utils");
 const { getGeminiResult } = require("../../utils/gemini-ai");
 
@@ -331,9 +332,10 @@ const getAllBooking = async (req, res) => {
 
                     grouped.set(booking.user_id, {
                         ...rest,
+                        status: getCurrentBookingState(rest.start_date, rest.end_date, new Date().toISOString()),
                         trips: [{ trip_id }],
                     });
-                }else {
+                } else {
                     grouped.get(booking.user_id).trips.push({ trip_id: booking.trip_id });
                 }
             })
@@ -344,32 +346,33 @@ const getAllBooking = async (req, res) => {
 
         const userMappedBookingTripId = transFormBookings(bookings);
 
+        // TODO: status 
 
         // find and filter the trip_id
-        const bookingData = userMappedBookingTripId.map((booking) => {
-            const detailsTrips = booking.trips.map((t) => {
-                const trip = trips.find((trip) => trip.id === t.trip_id);
+        // const bookingData = userMappedBookingTripId.map((booking) => {
+        //     const detailsTrips = booking.trips.map((t) => {
+        //         const trip = trips.find((trip) => trip.id === t.trip_id);
 
-                if(!trip) return null
+        //         if (!trip) return null
 
-                return {
-                    ...trip,
-                    result: trip.result ? JSON.parse(trip.result) : null,
-                    images: trip.images ? trip.images.split(",") : []
-                    }
-                }
-            )
+        //         return {
+        //             ...trip,
+        //             result: trip.result ? JSON.parse(trip.result) : null,
+        //             images: trip.images ? trip.images.split(",") : []
+        //         }
+        //     }
+        //     )
 
-            return {
-                ...booking,
-                trips : detailsTrips
-            }
-        })
+        //     return {
+        //         ...booking,
+        //         trips: detailsTrips
+        //     }
+        // })
 
         return res.status(200).json({
             code: 200,
             success: true,
-            trips: bookingData
+            trips: userMappedBookingTripId
         })
 
 
@@ -383,6 +386,54 @@ const getAllBooking = async (req, res) => {
     }
 }
 
+const getTripsListByIds = async (req, res) => {
+    const { ids } = req.body;
+    console.log("trips list");
+    try {
+        const db = getDB();
+
+        if (!ids) {
+            return res.status(400).json({
+                code: 400,
+                message: "Ids is required",
+                success: false
+            });
+        }
+
+        const mappedIds = Array.from(new Set([{ trip_id: 1 }, { trip_id: 2 }].map(t => t.trip_id)))
+
+        const [trips] = await db.query(
+            "SELECT * FROM trips WHERE id IN (?)",
+            [mappedIds]
+        );
+
+        if (!trips) {
+            return res.status(400).json({
+                code: 400,
+                message: "No trips found",
+                success: false
+            });
+        }
+
+        return res.status(200).json({
+            code : 200,
+            success : true,
+            trips : trips.map((trip) => ({
+                ...trip,
+                result: trip.result ? JSON.parse(trip.result) : null,
+                    images: trip.images ? trip.images.split(",") : []
+
+            }))
+        }) 
+    } catch (error) {
+        console.log("Error to get the trips data by ids is ", error);
+        return res.status(500).json({
+            code: 500,
+            message: "Something went wrong while fetching trips.",
+            error: error.message,
+        });
+    }
+}
 
 // const getChartBoatData = async(req , res) => {
 //     const {message} = req.body;
@@ -491,6 +542,7 @@ module.exports = {
     getChartBoatData,
     onTogglePublishTrip,
     onBookingTrip,
-    getAllBooking
+    getAllBooking,
+    getTripsListByIds
 };
 
